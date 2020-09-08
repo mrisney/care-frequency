@@ -1,0 +1,7 @@
+var initData = [
+{ "id": 1, "variableCodes": "One Lane or Ramp", "frequency1": 281, "frequency2": 2366, "percent1": 4.4, "percent2": 3, "cumulativeFrequency1": 281, "cumulativePercent1": 4.4, "overRepresented": 1.5038857075531684, "maxGain": 94.15069450511048, "significant": true },
+{ "id": 2, "variableCodes": "Two Lanes", "frequency1": 5473, "frequency2": 71257, "percent1": 86.5, "percent2": 88.9, "cumulativeFrequency1": 5754, "cumulativePercent1": 90.9, "overRepresented": 0.9725706656237841, "maxGain": -154.35459072245942, "significant": true },
+{ "id": 3, "variableCodes": "Three Lanes", "frequency1": 448, "frequency2": 3712, "percent1": 7.1, "percent2": 4.6, "cumulativeFrequency1": 6202, "cumulativePercent1": 98, "overRepresented": 1.5282461092462618, "maxGain": 154.85349873329255, "significant": true },
+{ "id": 4, "variableCodes": "Four Lanes", "frequency1": 112, "frequency2": 1597, "percent1": 1.8, "percent2": 2, "cumulativeFrequency1": 6314, "cumulativePercent1": 99.8, "overRepresented": 0.8880478330498003, "maxGain": -14.119332576220838, "significant": false },
+{ "id": 5, "variableCodes": "Five Lanes", "frequency1": 14, "frequency2": 1150, "percent1": 0.2, "percent2": 1.4, "cumulativeFrequency1": 6328, "cumulativePercent1": 100, "overRepresented": 0.15415352058484033, "maxGain": -76.8185550799336, "significant": false }
+];

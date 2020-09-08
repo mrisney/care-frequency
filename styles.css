@@ -1,0 +1,36 @@
+#form-container {
+	margin: 10px 10px 30px;
+}
+
+#load-indicator {
+	vertical-align: middle;
+	margin-right: 10px;
+}
+
+#chart {
+	height: 440px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.column {
+	float: left;
+	padding: 10px;
+}
+
+.left {
+	width: 35%;
+}
+
+.right {
+	width: 65%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+	content: "";
+	display: table;
+	clear: both;
+}
