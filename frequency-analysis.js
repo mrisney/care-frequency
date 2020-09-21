@@ -1,5 +1,6 @@
 $(function () {
 
+    const AGENCY = "wy"
     const REST_SVC_BASE_URL = "http://dev.itis-app.com/care-rest";
 
     var frequencyAnalysisRequest = {
@@ -18,7 +19,7 @@ $(function () {
         loadMode: "raw",
         cacheRawData: true,
         load: function () {
-            return $.getJSON(REST_SVC_BASE_URL + '/api/v1/datasources');
+            return $.getJSON(REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/datasources');
         }
     });
 
@@ -29,7 +30,7 @@ $(function () {
         cacheRawData: true,
         byKey: function (key) {
             var d = new $.Deferred();
-            $.get(REST_SVC_BASE_URL + '/api/v1/filters?datasource=' + key)
+            $.get(REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/filters?datasource=' + key)
                 .done(function (dataItem) {
                     d.resolve(dataItem);
                 });
@@ -44,7 +45,7 @@ $(function () {
         cacheRawData: true,
         byKey: function (key) {
             var d = new $.Deferred();
-            $.get(REST_SVC_BASE_URL + '/api/v1/variables?datasource=' + key)
+            $.get(REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/variables?datasource=' + key)
                 .done(function (dataItem) {
                     d.resolve(dataItem);
                 });
@@ -53,10 +54,8 @@ $(function () {
     });
 
     function getFrequencyAnalysisData() {
-        console.log("Frequency analysis request =  " + JSON.stringify(frequencyAnalysisRequest));
-
         $.ajax({
-            url: REST_SVC_BASE_URL + '/api/v1/frequency-analysis',
+            url: REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/frequency-analysis',
             type: "POST",
             data: JSON.stringify(frequencyAnalysisRequest),
             contentType: "application/json; charset=utf-8",
@@ -69,7 +68,6 @@ $(function () {
                 $("#freq-grid-container").dxDataGrid("instance").refresh();
                 $("#freq-chart").dxChart("instance").option("dataSource", data);
                 $("#freq-chart").dxChart("instance").refresh();
-
             }
         });
     }
@@ -82,7 +80,6 @@ $(function () {
                 filters.push({ value: element.value });
             });
             filterEditor.option("dataSource", filters);
-            console.log("number of items : " + filters.length);
         });
 
         var firstVariableEditor = $("#freq-form-container").dxForm("instance").getEditor("variable1");
@@ -93,7 +90,6 @@ $(function () {
                 variables.push({ value: element.value });
             });
             firstVariableEditor.option("dataSource", variables);
-            console.log("number of items : " + variables.length);
         });
 
         $("#freq-grid-container").dxDataGrid("instance").refresh();
@@ -132,12 +128,6 @@ $(function () {
             editorOptions: {
                 displayExpr: "value",
                 valueExpr: "value",
-                template: function (data, itemElement) {
-                    $("<div class='button-indicator'></div><span class='dx-button-text'>" + data.text + "</span>").appendTo(container);
-                    buttonIndicator = itemElement.find(".button-indicator").dxLoadIndicator({
-                        visible: false
-                    }).dxLoadIndicator("instance");
-                },
                 onValueChanged: function (data) {
                     frequencyAnalysisRequest.filterName = data.value;
                     getFrequencyAnalysisData();
@@ -154,7 +144,7 @@ $(function () {
             editorOptions: {
                 displayExpr: "value",
                 valueExpr: "value",
-                label: { 
+                label: {
                     text: "Variable"
                 },
                 onValueChanged: function (data) {
@@ -183,8 +173,20 @@ $(function () {
         columns: [{ dataField: "variableCodes", caption: frequencyAnalysisRequest.variableName },
         { dataField: "frequency1", caption: "Frequency" },
         { dataField: "cumulativeFrequency1", caption: "Cum. Frequency" },
-        { dataField: "percent1", caption: "Percent" },
-        { dataField: "cumulativePercent1", caption: "Cum. Percent" }],
+        {
+            dataField: "percent1", caption: "Percent", format: "fixedPoint",
+            precision: 2, dataType: "number",
+            customizeText: function (cellInfo) {
+                return cellInfo.valueText + " %";
+            }
+        },
+        {
+            dataField: "cumulativePercent1", caption: "Cum. Percent", format: "fixedPoint",
+            precision: 2, dataType: "number",
+            customizeText: function (cellInfo) {
+                return cellInfo.valueText + " %";
+            }
+        }],
         summary: {
             totalItems: [{
                 column: "cumulativePercent1",
@@ -194,7 +196,7 @@ $(function () {
     });
     var chart = $("#freq-chart").dxChart({
         dataSource: initData,
-        palette: "soft",
+        palette: "bright",
         commonSeriesSettings: {
             type: "bar",
             valueField: "frequency1",
