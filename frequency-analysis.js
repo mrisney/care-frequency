@@ -82,14 +82,14 @@ $(function () {
             filterEditor.option("dataSource", filters);
         });
 
-        var firstVariableEditor = $("#freq-form-container").dxForm("instance").getEditor("variable1");
+        var variableEditor = $("#freq-form-container").dxForm("instance").getEditor("variable");
 
         variablesDS.byKey(datasourceSelected).done(function (values) {
             var variables = [];
             values.forEach((element) => {
                 variables.push({ value: element.value });
             });
-            firstVariableEditor.option("dataSource", variables);
+            variableEditor.option("dataSource", variables);
         });
 
         $("#freq-grid-container").dxDataGrid("instance").refresh();
@@ -99,11 +99,11 @@ $(function () {
         formData: {
             datasource: null,
             filter: "",
-            variable1: "",
+            variable: "",
             noNulls: false
         },
         colCount: 4,
-        labelLocation: "top", // or "left" | "right"
+        labelLocation: "top",
         items: [{
             dataField: "datasource",
             editorType: "dxSelectBox",
@@ -139,7 +139,7 @@ $(function () {
             }]
         },
         {
-            dataField: "variable1",
+            dataField: "variable",
             editorType: "dxSelectBox",
             editorOptions: {
                 displayExpr: "value",
@@ -197,6 +197,10 @@ $(function () {
     var chart = $("#freq-chart").dxChart({
         dataSource: initData,
         palette: "bright",
+        adaptiveLayout: {
+            height: 200,
+            width: 400
+        },
         commonSeriesSettings: {
             type: "bar",
             valueField: "frequency1",

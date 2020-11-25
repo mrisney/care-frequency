@@ -8,7 +8,7 @@
 }
 
 #chart {
-	height: 440px;
+	height: 340px;
 }
 
 * {
@@ -23,7 +23,6 @@
 .left {
 	width: 35%;
 }
-
 .right {
 	width: 65%;
 }
