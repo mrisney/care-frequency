@@ -19,7 +19,7 @@ $(function () {
         loadMode: "raw",
         cacheRawData: true,
         load: function () {
-            return $.getJSON(REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/datasources');
+            return $.getJSON(REST_SVC_BASE_URL + '/api/v1/' + AGENCY + '/datasources');
         }
     });
 
@@ -30,7 +30,7 @@ $(function () {
         cacheRawData: true,
         byKey: function (key) {
             var d = new $.Deferred();
-            $.get(REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/filters?datasource=' + key)
+            $.get(REST_SVC_BASE_URL + '/api/v1/' + AGENCY + '/filters?datasource=' + key)
                 .done(function (dataItem) {
                     d.resolve(dataItem);
                 });
@@ -45,7 +45,7 @@ $(function () {
         cacheRawData: true,
         byKey: function (key) {
             var d = new $.Deferred();
-            $.get(REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/variables?datasource=' + key)
+            $.get(REST_SVC_BASE_URL + '/api/v1/' + AGENCY + '/variables?datasource=' + key)
                 .done(function (dataItem) {
                     d.resolve(dataItem);
                 });
@@ -55,7 +55,7 @@ $(function () {
 
     function getFrequencyAnalysisData() {
         $.ajax({
-            url: REST_SVC_BASE_URL + '/api/v1/'+AGENCY+'/frequency-analysis',
+            url: REST_SVC_BASE_URL + '/api/v1/' + AGENCY + '/frequency-analysis',
             type: "POST",
             data: JSON.stringify(frequencyAnalysisRequest),
             contentType: "application/json; charset=utf-8",
@@ -66,8 +66,8 @@ $(function () {
 
                 $("#freq-grid-container").dxDataGrid("instance").option("dataSource", data);
                 $("#freq-grid-container").dxDataGrid("instance").refresh();
-                $("#freq-chart").dxChart("instance").option("dataSource", data);
-                $("#freq-chart").dxChart("instance").refresh();
+                $("#freq-chart").dxPieChart("instance").option("dataSource", data);
+                $("#freq-chart").dxPieChart("instance").refresh();
             }
         });
     }
@@ -102,13 +102,14 @@ $(function () {
             variable: "",
             noNulls: false
         },
-        colCount: 4,
+        colCount: 5,
         labelLocation: "top",
         items: [{
             dataField: "datasource",
             editorType: "dxSelectBox",
             editorOptions: {
                 dataSource: dataSourcesDS,
+                searchEnabled: true,
                 valueExpr: "value",
                 displayExpr: "value",
                 searchEnabled: false,
@@ -125,7 +126,9 @@ $(function () {
         }, {
             dataField: "filter",
             editorType: "dxSelectBox",
+            colSpan: 2,
             editorOptions: {
+                searchEnabled: true,
                 displayExpr: "value",
                 valueExpr: "value",
                 onValueChanged: function (data) {
@@ -142,6 +145,7 @@ $(function () {
             dataField: "variable",
             editorType: "dxSelectBox",
             editorOptions: {
+                searchEnabled: true,
                 displayExpr: "value",
                 valueExpr: "value",
                 label: {
@@ -167,26 +171,57 @@ $(function () {
     });
 
     var dataGrid = $("#freq-grid-container").dxDataGrid({
+        selection: {
+            mode: 'multiple'
+        },
+        export: {
+            enabled: true
+        },
+        onExporting: function (e) {
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('Frequency Analysis');
+            DevExpress.excelExporter.exportDataGrid({
+                worksheet: worksheet,
+                component: e.component,
+                customizeCell: function (options) {
+                    var excelCell = options;
+                    excelCell.font = { name: 'Arial', size: 12 };
+                    excelCell.alignment = { horizontal: 'left' };
+                }
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'frequency-analysis.xlsx');
+                });
+            });
+            e.cancel = true;
+        },
         dataSource: initData,
         keyExpr: "id",
         showBorders: true,
-        columns: [{ dataField: "variableCodes", caption: frequencyAnalysisRequest.variableName },
-        { dataField: "frequency1", caption: "Frequency" },
-        { dataField: "cumulativeFrequency1", caption: "Cum. Frequency" },
-        {
-            dataField: "percent1", caption: "Percent", format: "fixedPoint",
-            precision: 2, dataType: "number",
-            customizeText: function (cellInfo) {
-                return cellInfo.valueText + " %";
+        onCellClick: function (e) {
+            if (e.rowType == 'header') {
+                updateChart(e.column.dataField);
+
             }
         },
-        {
-            dataField: "cumulativePercent1", caption: "Cum. Percent", format: "fixedPoint",
-            precision: 2, dataType: "number",
-            customizeText: function (cellInfo) {
-                return cellInfo.valueText + " %";
-            }
-        }],
+        columns: [
+            { dataField: "variableCodes", caption: frequencyAnalysisRequest.variableName, allowExporting: true },
+            { dataField: "frequency1", caption: "Frequency", allowExporting: true },
+            { dataField: "cumulativeFrequency1", caption: "Cum. Frequency" },
+            {
+                dataField: "percent1", caption: "Percent", format: "fixedPoint",
+                precision: 2, dataType: "number",
+                customizeText: function (cellInfo) {
+                    return cellInfo.valueText + " %";
+                }
+            },
+            {
+                dataField: "cumulativePercent1", caption: "Cum. Percent", format: "fixedPoint",
+                precision: 2, dataType: "number",
+                customizeText: function (cellInfo) {
+                    return cellInfo.valueText + " %";
+                }
+            }],
         summary: {
             totalItems: [{
                 column: "cumulativePercent1",
@@ -194,21 +229,92 @@ $(function () {
             }]
         }
     });
-    var chart = $("#freq-chart").dxChart({
-        dataSource: initData,
+    var piechart = $("#freq-chart").dxPieChart({
+        type: 'doughnut',
         palette: "bright",
-        adaptiveLayout: {
-            height: 200,
-            width: 400
+        dataSource: initData,
+        legend: {
+            horizontalAlignment: "center",
+            verticalAlignment: "bottom"
         },
-        commonSeriesSettings: {
-            type: "bar",
-            valueField: "frequency1",
-            argumentField: "variableCodes",
-            ignoreEmptyPoints: true
+        series: [
+            {
+                argumentField: "variableCodes",
+                valueField: "percent1",
+                label: {
+                    visible: true,
+                    connector: {
+                        visible: true,
+                        width: 1
+                    }
+                }
+            }
+        ],
+        title: {
+            text: "Percent",
+            font: {
+                size: 14,
+                weight: 300
+            },
         },
-        seriesTemplate: {
-            nameField: "frequency1"
+        export: {
+            enabled: true
+        },
+        onPointClick: function (e) {
+            var point = e.target;
+
+            toggleVisibility(point);
+        },
+        onLegendClick: function (e) {
+            var arg = e.target;
+
+            toggleVisibility(this.getAllSeries()[0].getPointsByArg(arg)[0]);
         }
     });
+    function toggleVisibility(item) {
+        if (item.isVisible()) {
+            item.hide();
+        } else {
+            item.show();
+        }
+    }
+
+
+    function updateChart(header) {
+        var pieChart = $("#freq-chart").dxPieChart('instance');
+        var pieChartData = frequencyAnalysisData.length > 0 ? frequencyAnalysisData : initData;
+        var caption = header;
+        switch (header) {
+            case 'frequency1':
+                caption = "Frequency";
+                break;
+            case 'cumulativeFrequency1':
+                caption = "Cumulative Frequency";
+                break;
+            case 'percent1':
+                caption = "Percent";
+                break;
+            case 'cumulativePercent1':
+                caption = "Cumulative Percent";
+                break;
+        }
+        pieChart.showLoadingIndicator();
+        pieChart.option("title", { text: caption });
+
+        $("#freq-chart").dxPieChart({
+            dataSource: pieChartData,
+            series: {
+                argumentField: 'variableCodes',
+                valueField: header,
+                label: {
+                    visible: true,
+                    connector: {
+                        visible: true,
+                        width: 1
+                    }
+                }
+            }
+        });
+        pieChart.refresh();
+    }
 });

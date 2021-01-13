@@ -26,6 +26,10 @@
     <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.2.3/css/dx.light.compact.css" />
     <script src="https://cdn3.devexpress.com/jslib/20.2.3/js/dx.all.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.1.1/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+
     <script type="text/javascript" src="frequency-analysis-init-data.js"></script>
     <script type="text/javascript" src="frequency-analysis.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css" />
@@ -37,10 +41,8 @@
     </div>
     <div id="freq-form-container"></div>
     <div class="row">
-       <div id="freq-chart"></div>
-    </div>
-    <div class="row">
-       <div id="freq-grid-container" class="column"></div>
+       <div id="freq-chart"class="column left"></div>
+       <div id="freq-grid-container" class="column right"></div>
     </div>
 </body>
 </html>
